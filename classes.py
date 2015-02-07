@@ -1,16 +1,21 @@
-class Ceremony():
-	def __init__(self, name):
-		self.name = name
-		self.hosts = []
-		self.awards = []
-		self.location = None
-		self.dateTime = None
+class user:
+    def __init__(self):
+        self.score = 1
+        self.tweetList = []
+        self.userName = ''
+        self.userId = 0
 
+class tweet:
+    def __init__(self):
+        self.text = ''
+        self.score = 1
+        self.tweetId = 0
 
-class Awards():
-	def __init__(self, name):
-		self.name = name
-		self.presenters = []
-		self.nominees = []
-		self.winner = "none"
-
+class event:
+    def __init__(self):
+        self.name = ''
+        self.id = 0
+        self.tweeters = []     
+        self.hashtags = {}          
+        self.keywords = {}      
+        self.dict_words = {}    
