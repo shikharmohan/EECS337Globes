@@ -155,7 +155,6 @@ def tweetParseLineObjects(json_object, keyword_list, tweeter_list, word_list, us
     twt.text = json_object['text']
     twt.tweetId = json_object['id']
 
-
     #Create the tweeter object
     twter = tweeter()
     twter.tweets.append(twt)
@@ -186,97 +185,97 @@ def tweetParseLineObjects(json_object, keyword_list, tweeter_list, word_list, us
             
 
         #Find the original tweet and increase its score. Also find the user and increase his score.
-        # if retweet and mention:
+        if retweet and mention:
 
-        #         mention = False
-        #         retweet = False
+                mention = False
+                retweet = False
 
-        #         #If the user mentioned is not in the user list, create a ghost of the user
-        #         if (word not in user_list.keys()) and (word not in ghost_list.keys()):
+        #         # #If the user mentioned is not in the user list, create a ghost of the user
+                if (word not in user_list) and (word not in ghost_list):
 
-        #             ghosted_twter = tweeter()
-        #             ghosted_twter.userName = word
-        #             ghosted_twter.score = 1
-        #             ghosted_twter.userId = -1
+                    ghosted_twter = tweeter()
+                    ghosted_twter.userName = word
+                    ghosted_twter.score = 1
+                    ghosted_twter.userId = -1
 
-        #             ghosted_twt = tweet()
-        #             ghosted_twt.text = twt.text
-        #             ghosted_twt.score = 1
-        #             ghosted_twt.tweetId = -1
+                    ghosted_twt = tweet()
+                    ghosted_twt.text = twt.text
+                    ghosted_twt.score = 1
+                    ghosted_twt.tweetId = -1
 
-        #             ghosted_twter.tweets.append(ghosted_twt)
+                    ghosted_twter.tweets.append(ghosted_twt)
 
-        #             ghost_list[word] = ghosted_twter
+                    ghost_list[word] = ghosted_twter
                     
-        #             recent = True
+                    recent = True
 
-        #         #Check to see if the retweet belongs to a ghost
-        #         if (word in ghost_list) and not recent:
-        #             exists = False
+                #Check to see if the retweet belongs to a ghost
+                if (word in ghost_list) and not recent:
+                    exists = False
 
-        #             ghost = ghost_list[word]
+                    ghost = ghost_list[word]
 
-        #             ghosted_twt = tweet()
-        #             ghosted_twt.text = twt.text
+                    ghosted_twt = tweet()
+                    ghosted_twt.text = twt.text
 
-        #             for gt in ghost.tweets:
-        #                 if ghosted_twt.text == gt.text:
-        #                     exists = True
-        #                     gt.score = gt.score + 1
+                    for gt in ghost.tweets:
+                        if ghosted_twt.text == gt.text:
+                            exists = True
+                            gt.score = gt.score + 1
                             
-        #             if exists != True:
-        #                 ghost.tweets.append(ghosted_twt)
+                    if exists != True:
+                        ghost.tweets.append(ghosted_twt)
 
-        #             ghost.score = ghost.score + 1
+                    ghost.score = ghost.score + 1
 
         #         #Otherwise, increase the original tweeter's and tweet's score
-        #         if (not recent) and (word in user_list.keys()):
-        #             id = user_list[word]
-        #             mentioned = tweeter_list[id]
-        #             found = False
+                if (not recent) and (word in user_list):
+                    id = user_list[word]
+                    mentioned = tweeter_list[id]
+                    found = False
 
-        #             for t in mentioned.tweets:
-        #                 if t.text in twt.text:
-        #                     found = True
-        #                     t.score = t.score + 1
+                    for t in mentioned.tweets:
+                        if t.text in twt.text:
+                            found = True
+                            t.score = t.score + 1
 
-        #             if not found:
-        #                 newTweet = tweet()
-        #                 newTweet.text = twt.text
-        #                 mentioned.tweets.append(newTweet)
+                    if not found:
+                        newTweet = tweet()
+                        newTweet.text = twt.text
+                        mentioned.tweets.append(newTweet)
 
-        #             mentioned.score = mentioned.score + 1
+                    mentioned.score = mentioned.score + 1
 
-        # #Interpret the twitter commands and adjust the bools
-        # if '#' in word:
-        #     hashtag = True
-        # if '@' in word:
-        #     mention = True
-        # if 'RT' in word:
-        #     retweet = True
+        #Interpret the twitter commands and adjust the bools
+        if '#' in word:
+            hashtag = True
+        if '@' in word:
+            mention = True
+        if 'RT' in word:
+            retweet = True
 
-        # #Add word to the master word list, or increase its score.
-        # if word not in word_list:
-        #     word_list[word] = 1
-        # else:
-        #     freq = word_list[word]
-        #     word_list[word] = freq + 1
+        #Add word to the master word list, or increase its score.
+        if word not in word_list:
+            word_list[word] = 1
+        else:
+            freq = word_list[word]
+            word_list[word] = freq + 1
 
-    #Check to see if tweeter has a ghost
-    if twter.userName in ghost_list.keys() and not recent:
+    # #Check to see if tweeter has a ghost
+    # if twter.userName in ghost_list.keys() and not recent:
         
 
-        #Copy the information from the ghost to the tweeter
-        ghost = ghost_list[twter.userName]
+    #     #Copy the information from the ghost to the tweeter
+    #     ghost = ghost_list[twter.userName]
 
-        for t in ghost.tweets:
-            twter.tweets.append(t)
+    #     for t in ghost.tweets:
+    #         twter.tweets.append(t)
 
-        twter.score = twter.score + ghost.score
-        try:
-            del ghost_list[twter.userName]
-        except KeyError:
-            pass
+    #     twter.score = twter.score + ghost.score
+    #     try:
+    #         del ghost_list[twter.userName]
+    #     except KeyError:
+    #         pass
 
     #Add tweeter to the master tweeter list
     if twter.userId not in tweeter_list:
@@ -334,15 +333,11 @@ def main():
 
     #Parse the text from the tweets
     progress = 0
-    for idx, item in enumerate(json_data):
+    for item in json_data:
         progress = progress + 1
         if progress % 10000 == 0:
             print str(progress) + 'tweets processed'
-        if progress  > 100000:
-            break
         try:
-            if idx == 500:
-                pdb.set_trace()
             tweetParseLineObjects(item, hashtags, tweeters, words, userIdTable, ghosted_tweeters)
         except:
             print(item['id'])
@@ -351,9 +346,9 @@ def main():
 
 
     #Number Constants
-    POPULARITY_THRESHOLD = 100
-    RETWEET_THRESHOLD = 100
-    KEYWORD_THRESHOLD = 10000
+    # POPULARITY_THRESHOLD = 100
+    # RETWEET_THRESHOLD = 10
+    # KEYWORD_THRESHOLD = 10000
 
     
 

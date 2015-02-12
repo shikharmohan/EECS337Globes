@@ -40,6 +40,7 @@ def getProperNouns(filePath):
 def findHostTweets(text):
 	pattern = re.compile(".* host.* Golden Globes .*", re.IGNORECASE)
 
+
 	hostMentioned = False
 
 	if pattern.match(text):
