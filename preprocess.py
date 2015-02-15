@@ -10,12 +10,16 @@ import sys
 from classes import *
 from collections import OrderedDict
 
+if(sys.argv[1] =='gg15mini'):
+    year = 2015
+else:
+    year = 2013
 
 def keywordCheck(string):
     """Check to see if the word is not a symbol or short word"""
     if ((string != 'RT') 
     and (string != '#') 
-    and (string != 'at') 
+    and (string != '@') 
     and (string != 'the') 
     and (string != 'is') 
     and (string != 'I') 
@@ -41,20 +45,115 @@ def keywordCheck(string):
     else:
         return False
 
-#Creates an relation between tweeter and tweets/hashtags/keywords
-def createRelation(name, top_tweeter_list, word_list, keyword_list, hashtag_list):
+def createEvent(name, top_tweeter_list, word_list, keyword_list, hashtag_list):
+    """Creates an event that will be reported to the user"""
 
-    Relation = relation()
-    Relation.name = name
-    Relation.tweeters = top_tweeter_list
-    Relation.words_dict = word_list
-    Relation.tags = hashtag_list
-    Relation.tagwords = keyword_list
+    Event = event()
+    Event.name = name
+ #   Event.actors = actor_list
+ #   Event.awards = award_list
+    Event.reporters = top_tweeter_list
+    Event.words_dict = word_list
+    Event.tags = hashtag_list
+    Event.tagwords = keyword_list
 
-    return Relation
+    return Event
 
-#Parses the tweet from the corpus and updates various lists
-def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, atuser_list):
+def findAwards(proper_phrase_list):
+    award_list = []
+    for phrase in proper_phrase_list:
+        if 'Best' in phrase:
+            award_list.append(phrase)
+    return award_list
+
+def findActors(proper_phrase_list):
+    actor_list = []
+    for phrase in proper_phrase_list:
+        tokens = nltk.wordpunct_tokenize(phrase)
+        if len(tokens) == 2:
+            actor_list.append(phrase)
+    return actor_list
+
+def properNounExtractor(text_dict):
+    """Takes a dictionary of words and then returns all the proper nouns in a list"""
+    
+    print('Building Proper Noun List')
+    
+    #Proper noun list, progress, and bool
+    properNoun_list = []
+    properNoun = False
+    progress = 0
+    total = 0
+
+    #Find the total number of words to be processed
+    total = len(text_dict.keys())
+
+    for word in text_dict.keys():
+        
+        #Create a word list for the tagger
+        list = []
+        list.append(word)
+
+        #Tag the word
+        tag = nltk.pos_tag(list)
+
+        #Check the tag to see if it is a proper noun.  If so, add to proper noun list
+        if (tag[0][1] == 'NNP'):
+            properNoun = True
+        else:
+            if properNoun:
+                properNoun = False
+
+        if properNoun:
+            #If the word contains multiple words, split them up
+            wordList = re.findall('[A-Z][^A-Z]*', word)
+
+            #If there was more than one word, then send each word to proper noun list separately
+            for x in range(0, len(wordList)):
+                properNoun_list.append(wordList[x])
+
+        #Increment progress
+        progress = progress + 1
+
+        #Display progress
+        if progress % 1000 == 0:
+            print(progress, ' out of ', total, ' words processed.')
+
+    return properNoun_list
+
+def properNounMatcher(text_list, properNoun_list):
+    """Finds proper nouns in a list of strings and then outputs them to a list separated by '' elements"""
+
+    #Create a list to store the proper nouns in
+    extracted_propers = []
+
+    #If the word is in the proper noun list, add it to the extracted list, otherwise just add '' to the list
+    for word in text_list:
+        if word in properNoun_list:
+            extracted_propers.append(word)
+        else:
+            empty = ''
+            extracted_propers.append(empty)
+
+    return extracted_propers
+
+def properNounPhraser(text_list, properNoun_list, phrased_list):
+    """Updates a list of phrases of successive proper nouns from a list of strings"""
+    
+    #Variable to hold the proper noun phrase
+    nounHolder = ''
+
+    #Keep adding words to the phrase until we encounter a '', then add phrase to phrase list
+    for item in text_list:
+        if item == '':
+            if nounHolder not in phrased_list:
+                phrased_list.append(nounHolder)
+            nounHolder = ''
+        else:
+            nounHolder = nounHolder + ' ' + item
+
+def tweetParseLineObjects(json_object, keyword_list, tweeter_list, word_list, user_list, ghost_list):
+    """Parses the tweet from the json_object and updates categories"""
 
     #Create the tweet object
     twt = tweet()
@@ -67,14 +166,15 @@ def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, 
     twter.userName = json_object['user']['screen_name']
     twter.userId = json_object['user']['id']
 
-
+    #Create tokens from text
     text = nltk.wordpunct_tokenize(twt.text)
     
     #Bools
+    hashtag = False
     mention = False
     retweet = False
+    properNoun = False
     recent = False
-    hashtag = False
 
     #Look through each word to categorize it
     for word in text:
@@ -95,46 +195,46 @@ def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, 
                 mention = False
                 retweet = False
 
-        #If the user mentioned is not in the user list, create a reference to the atuser 
-                if (word not in user_list) and (word not in atuser_list):
+        #         # #If the user mentioned is not in the user list, create a ghost of the user
+                if (word not in user_list) and (word not in ghost_list):
 
-                    atuser_twter = tweeter()
-                    atuser_twter.userName = word
-                    atuser_twter.score = 1
-                    atuser_twter.userId = -1
+                    ghosted_twter = tweeter()
+                    ghosted_twter.userName = word
+                    ghosted_twter.score = 1
+                    ghosted_twter.userId = -1
 
-                    atuser_twt = tweet()
-                    atuser_twt.text = twt.text
-                    atuser_twt.score = 1
-                    atuser_twt.tweetId = -1
+                    ghosted_twt = tweet()
+                    ghosted_twt.text = twt.text
+                    ghosted_twt.score = 1
+                    ghosted_twt.tweetId = -1
 
-                    atuser_twter.tweets.append(atuser_twt)
+                    ghosted_twter.tweets.append(ghosted_twt)
 
-                    atuser_list[word] = atuser_twter
+                    ghost_list[word] = ghosted_twter
                     
                     recent = True
 
-                #Check to see if the retweet belongs to a atuser
-                if (word in atuser_list) and (not recent):
+                #Check to see if the retweet belongs to a ghost
+                if (word in ghost_list) and not recent:
                     exists = False
 
-                    atuser = atuser_list[word]
+                    ghost = ghost_list[word]
 
-                    atuser_twt = tweet()
-                    atuser_twt.text = twt.text
+                    ghosted_twt = tweet()
+                    ghosted_twt.text = twt.text
 
-                    for gt in atuser.tweets:
-                        if atuser_twt.text == gt.text:
+                    for gt in ghost.tweets:
+                        if ghosted_twt.text == gt.text:
                             exists = True
                             gt.score = gt.score + 1
                             
                     if exists != True:
-                        atuser.tweets.append(atuser_twt)
+                        ghost.tweets.append(ghosted_twt)
 
-                    atuser.score = atuser.score + 1
+                    ghost.score = ghost.score + 1
 
-            #Otherwise, increase the original tweeter's and tweet's score
-                if (word in user_list) and (not recent):
+        #         #Otherwise, increase the original tweeter's and tweet's score
+                if (not recent) and (word in user_list):
                     id = user_list[word]
                     mentioned = tweeter_list[id]
                     found = False
@@ -154,7 +254,7 @@ def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, 
         #Interpret the twitter commands and adjust the bools
         if '#' in word:
             hashtag = True
-        if 'at' in word:
+        if '@' in word:
             mention = True
         if 'RT' in word:
             retweet = True
@@ -166,21 +266,21 @@ def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, 
             freq = word_list[word]
             word_list[word] = freq + 1
 
-    #Check to see if tweeter has a atuser
-    if twter.userName in atuser_list.keys() and not recent:
+    # #Check to see if tweeter has a ghost
+    # if twter.userName in ghost_list.keys() and not recent:
         
 
-        #Copy the information from the atuser to the tweeter
-        atuser = atuser_list[twter.userName]
+    #     #Copy the information from the ghost to the tweeter
+    #     ghost = ghost_list[twter.userName]
 
-        for t in atuser.tweets:
-            twter.tweets.append(t)
+    #     for t in ghost.tweets:
+    #         twter.tweets.append(t)
 
-        twter.score = twter.score + atuser.score
-        try:
-            del atuser_list[twter.userName]
-        except KeyError:
-            pass
+    #     twter.score = twter.score + ghost.score
+    #     try:
+    #         del ghost_list[twter.userName]
+    #     except KeyError:
+    #         pass
 
     #Add tweeter to the master tweeter list
     if twter.userId not in tweeter_list:
@@ -190,46 +290,77 @@ def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, 
         tweeter_list[twter.userId].tweets.append(twt)
             
 def main():
+    #File data variables
     file_data = []
     json_data = []
     
-    #Lists
+    #Dictionaries
     hashtags = {}
     keywords = {}
     words = {} 
     tweeters = {}
-    atuser_tweeters = {}
-    userTable = {}
+    ghosted_tweeters = {}
+    userIdTable = {}
 
+    #Lists
+    properNouns = []
+    properPhrases = []
+    top_tweeters = []
+    # if not line: break
+    # file_data.append(line)
+    # pdb.set_trace()
+    # for x in range(0, len(file_data[0])):
+    #     try:
+    #         # file_data[x].replace('\n', ' n')
+    #         # file_data[x].replace('\r', ' r')
+    #         json_data.append(json.loads(file_data[0][x]))
+    #     except:
+    #         print(x)
+    #         # print(file_data[x])
+    #         break
+
+    #JSON file location
     json_file = sys.argv[1]
-    if(json_file == 'gg15mini.json'):
-        year = 2015
-    else:
-        year = 2013
 
-        #open corpus
+    #Open the JSON File and load contents into a list
     with open(json_file, 'r') as f:
+        
         text = f.readline()
         json_data = json.loads(text)
+        # while True:
+        #     line = f.readline()
+        # if progress % 2000 == 0:
+        #         print(progress, ' tweets processed')
 
     print('Loading completed.  Processing tweets...')
+
+
 
     #Parse the text from the tweets
     progress = 0
     for item in json_data:
-        progress += 1
+        progress = progress + 1
         if progress % 10000 == 0:
-            print str(progress) + ' tweets processed'
+            print str(progress) + 'tweets processed'
         try:
-            tweetProcess(item, hashtags, tweeters, words, userTable, atuser_tweeters)
+            tweetParseLineObjects(item, hashtags, tweeters, words, userIdTable, ghosted_tweeters)
         except:
             print(item['id'])
             print('An error occurred parsing this line')
             print(item['created_at'])
+
+
+    #Number Constants
+    # POPULARITY_THRESHOLD = 100
+    # RETWEET_THRESHOLD = 10
+    # KEYWORD_THRESHOLD = 10000
+
     
 
-    #Start Processing
+    #Start Program
     print('Loading ', json_file, '...')
+
+    
 
     #Pick out keywords from the word list using the hashtags
     print('Finding keywords')
@@ -250,10 +381,13 @@ def main():
     sorted_hashtags = OrderedDict(sorted(hashtags.items(), key=lambda hashtags: hashtags[1], reverse=True))
     print('Sorting users')
     sorted_users = OrderedDict(sorted(tweeters.items(), key=lambda tweeters: tweeters[1].score, reverse=True))
-    print('Sorting atusers')
-    sorted_atusers = OrderedDict(sorted(atuser_tweeters.items(), key=lambda atuser_tweeters: atuser_tweeters[1].score, reverse=True))
+    print('Sorting ghosts')
+    sorted_ghosts = OrderedDict(sorted(ghosted_tweeters.items(), key=lambda ghosted_tweeters: ghosted_tweeters[1].score, reverse=True))
     print('Sorting keywords')
     sorted_keywords = OrderedDict(sorted(filtered_keywords.items(), key=lambda filtered_keywords: filtered_keywords[1], reverse=True))
+
+    #Extract the proper nouns from the word list
+#    properNouns = properNounExtractor(sorted_keywords)
 
     #Write the most popular hashtags to file
     print('Writing popular hashtags to hashtags.txt')
@@ -267,9 +401,9 @@ def main():
                 output.write('Error writing hashtag to file \r')
 
     #Print the most popular users
-    print('Writing users to tweeters.txt')
+    print('Writing users to users.txt')
 
-    with open('tweeters.txt', 'w') as output:
+    with open('users.txt', 'w') as output:
         for user in sorted_users:
             try:
                 output.write(sorted_users[user].userName)
@@ -280,9 +414,9 @@ def main():
                 output.write('Error writing user to file\r')
 
     #Print the most popular users
-    print('Writing keywords to popular_keywords.txt')
+    print('Writing keywords to keywords.txt')
 
-    with open('popular_keywords.txt', 'w') as output:
+    with open('keywords.txt', 'w') as output:
         for word in sorted_keywords.keys():
             try:
                 output.write(word)
@@ -299,19 +433,24 @@ def main():
     with open('retweets.txt', 'w') as output:
         for twter in sorted_users.values():
 
-            # if twter.userName == 'goldenglobes':
-            #     pass
+            #Find golden globes (DEBUG)
+            if twter.userName == 'goldenglobes':
+                pass
 
             i = i + 1
-            if i<3000:
+            if i<2500:
                 try:
-                    if i<10:
+                    if i<20:
                         output.write(twter.userName)
                         output.write('\r')
                 except:
                     print('Username is unreadable')
                 for twt in twter.tweets:
                     try:
+                        #Find the proper noun phrases
+#                        protoPhrases = []
+#                        protoPhrases = properNounMatcher(nltk.wordpunct_tokenize(twt.text), properNouns)
+#                        properNounPhraser(protoPhrases, properNouns, properPhrases)
                         #Only write the top tweets
                         if i<20:
                             output.write('   ')
@@ -319,22 +458,76 @@ def main():
                             output.write('\r')
                     except:
                         output.write('Error writing tweet to file\r')
+ #           if (i % 500 == 0) and (i <= 2500):
+ #               print(i, ' out of 2500 tweeters processed')
 
-    print('Writing Relation to userTweetRelation.txt')
+#    print('Writing proper noun phrases to proper_phrases.txt')
 
-    with open('userTweetRelation.txt', 'wb') as output:
-        pickle.dump(createRelation('Golden Globes', sorted_users.values(), words, sorted_keywords.values(), hashtags), output)
+#    with open('proper_phrases.txt', 'w') as output:
+#        for phrase in properPhrases:
+#            try:
+#                output.write(phrase)
+#                output.write('\r')
+#            except:
+#                output.write('Error writing proper noun phrase to file \r')
 
-    print('Writing atuser tweets to atusers.txt')
+#    print('Finding Awards')
 
-    with open('atusers'+year+'.txt', 'w') as output:
-        for atUser in sorted_atusers.values():
+#    awards_list = []
+#    awards_list = findAwards(properPhrases)
+
+#    print('Writing discovered awards to awards.txt')
+
+#    with open('awards.txt', 'w') as output:
+#        for award in awards_list:
+#            try:
+#                output.write(award)
+#                output.write('\r')
+#            except:
+#                output.write('Error writing award to file \r')
+
+#    print('Finding Actors')
+
+#    actors_list = []
+#    actors_list = findActors(properPhrases)
+
+#    print('Writing discovered actors to actors.txt')
+
+#    with open('actors.txt', 'w') as output:
+#        for actor in actors_list:
+#            try:
+#                output.write(actor)
+#                output.write('\r')
+#            except:
+#                output.write('Error writing actor to file \r')
+
+    awardEvent = createEvent('Golden Globes', sorted_users.values(), words, keywords, hashtags)
+
+    print('Writing Event to event.txt')
+
+    with open('event.txt', 'wb') as output:
+        pickle.dump(awardEvent, output)
+
+#    print('Writing Proper nouns to propernouns.txt')
+
+#    with open('propernouns.txt', 'w') as output:
+#        for word in properNouns:
+#            try:
+#                output.write(word)
+#                output.write('\r')
+#            except:
+#                output.write('Error writing proper noun to file\r')
+
+    print('Writing Ghost tweets to ghosts.txt')
+
+    with open('ghosts.txt', 'w') as output:
+        for g in sorted_ghosts.values():
             try:
-                output.write(atUser.userName)
+                output.write(g.userName)
                 output.write('\r')
             except:
                 output.write('Error writing username to file\r')
-            for t in atUser.tweets:
+            for t in g.tweets:
                 try:
                     output.write('    ')
                     output.write(t.text)
@@ -343,6 +536,9 @@ def main():
                     output.write('Error writing tweet to file\r')
 
     #Program is complete
-    print('Tweet processing complete')
+    print('Processing Complete')
+
+    return
+
 
 main()

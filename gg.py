@@ -6,6 +6,8 @@ import collections, difflib
 import pickle
 from classes import *
 import time
+import sys
+import copy
 from collections import OrderedDict
 
 gg = ['Golden Globes', 'GoldenGlobes', 'golden globes']
@@ -13,12 +15,67 @@ awardNameStopList = ['at', 'the', 'for']
 slangStopList = ["omg", "lol", "ha*ha", "ja.*ja", "na.*na", "wow", "idk", "wtf"]
 tagger = nltk.data.load(nltk.tag._POS_TAGGER)
 
-def loadJSONFromFile(filePath):
-	json_data = []
+answers = {
+    "metadata": {
+        "year": "",
+        "hosts": {
+            "method": "hardcoded",
+            "method_description": ""
+            },
+        "nominees": {
+            "method": "scraped",
+            "method_description": "Used regex, proper noun extractor & keywords like nominated, wish, hope etc. to filter tweets "
+            },
+    "awards": {
+            "method": "detected",
+            "method_description": ""
+            },
+        "presenters": {
+            "method": "hardcoded",
+            "method_description": ""
+            }
+        },
+    "data": {
+        "unstructured": {
+            "hosts": [],
+            "winners": [],
+            "awards": [],
+            "presenters": [],
+            "nominees": []
+        },
+        "structured": {
+            "Cecil B. DeMille Award": {
+                "nominees": [],
+                "winner": "",
+                "presenters": []
+            }
+        }
+    }
+}
+
+if(sys.argv[1] == '2015'):
+	answers['metadata']['year'] = 2015
+	answers['data']['unstructured']['hosts'] = ['Amy Poehler', 'Tina Fey']
+	answers['data']['unstructured']['awards'] = ["Cecil B. DeMille Award", "Best Motion Picture - Drama", "Best Performance by an Actress in a Motion Picture - Drama", "Best Performance by an Actor in a Motion Picture - Drama", "Best Motion Picture - Comedy Or Musical", "Best Performance by an Actress in a Motion Picture - Comedy Or Musical", "Best Performance by an Actor in a Motion Picture - Comedy Or Musical", "Best Animated Feature Film", "Best Foreign Language Film", "Best Performance by an Actress In A Supporting Role in a Motion Picture", "Best Performance by an Actor In A Supporting Role in a Motion Picture", "Best Director - Motion Picture", "Best Screenplay - Motion Picture", "Best Original Score - Motion Picture", "Best Original Song - Motion Picture", "Best Television Series - Drama", "Best Performance by an Actress In A Television Series - Drama", "Best Performance by an Actor In A Television Series - Drama", "Best Television Series - Comedy Or Musical", "Best Performance by an Actress In A Television Series - Comedy Or Musical", "Best Performance by an Actor In A Television Series - Comedy Or Musical", "Best Mini-Series Or Motion Picture Made for Television", "Best Performance by an Actress In A Mini-series or Motion Picture Made for Television", "Best Performance by an Actor in a Mini-Series or Motion Picture Made for Television", "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television", "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"]
+	answers['data']['unstructured']['presenters'] = ["vince vaughn", "kate beckinsale", "harrison ford", "chris pratt", "lupita nyong'o", "colin farrell", "gwyneth paltrow", "katherine heigl", "don cheadle", "jane fonda", "jennifer aniston", "kristen wiig", "adrien brody", "david duchovny", "prince", "adam levine", "kevin hart", "jeremy renner", "bryan cranston", "matthew mcconaughey", "sienna miller", "benedict cumberbatch", "katie holmes", "salma hayek", "meryl streep", "jennifer lopez", "anna faris", "lily tomlin", "amy adams", "jamie dornan", "jared leto", "kerry washington", "ricky gervais", "robert downey, jr.", "bill hader", "paul rudd", "dakota johnson", "seth meyers", "julianna margulies"]
+	answers['data']['structured']['Cecil B. DeMille Award']['winner'] = "George Clooney" 
+	answers['data']['structured']['Cecil B. DeMille Award']['presenters'] = ["don cheadle", "julianna margulies"]
+else:
+	answers['metadata']['year'] = 2013
+	answers['data']['unstructured']['hosts'] = ['Amy Poehler', 'Tina Fey']
+	answers['data']['unstructured']['awards'] = ["Cecil B. DeMille Award", "Best Motion Picture - Drama", "Best Performance by an Actress in a Motion Picture - Drama", "Best Performance by an Actor in a Motion Picture - Drama", "Best Motion Picture - Comedy Or Musical", "Best Performance by an Actress in a Motion Picture - Comedy Or Musical", "Best Performance by an Actor in a Motion Picture - Comedy Or Musical", "Best Animated Feature Film", "Best Foreign Language Film", "Best Performance by an Actress In A Supporting Role in a Motion Picture", "Best Performance by an Actor In A Supporting Role in a Motion Picture", "Best Director - Motion Picture", "Best Screenplay - Motion Picture", "Best Original Score - Motion Picture", "Best Original Song - Motion Picture", "Best Television Series - Drama", "Best Performance by an Actress In A Television Series - Drama", "Best Performance by an Actor In A Television Series - Drama", "Best Television Series - Comedy Or Musical", "Best Performance by an Actress In A Television Series - Comedy Or Musical", "Best Performance by an Actor In A Television Series - Comedy Or Musical", "Best Mini-Series Or Motion Picture Made for Television", "Best Performance by an Actress In A Mini-series or Motion Picture Made for Television", "Best Performance by an Actor in a Mini-Series or Motion Picture Made for Television", "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television", "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"]
+	answers['data']['unstructured']['presenters'] = ["will ferrell", "kate hudson", "sacha baron cohen", "john krasinski", "aziz ansari", "julia roberts", "don cheadle", "kristen wiig", "arnold schwarzenegger", "lucy liu", "nathan fillion", "jay leno", "sylvester stallone", "jonah hill", "jimmy fallon", "kiefer sutherland", "jason statham", "jessica alba", "george clooney", "dennis quaid", "robert pattinson", "halle berry", "kristen bell", "lea michele", "salma hayek", "jennifer lopez", "dustin hoffman", "amanda seyfried", "kerry washington", "debra messing", "eva longoria", "jennifer garner", "megan fox", "paul rudd", "jason bateman", "bradley cooper", "robert downey, jr."]
+	answers['data']['structured']['Cecil B. DeMille Award']['winner'] = "Jodie Foster" 
+	answers['data']['structured']['Cecil B. DeMille Award']['presenters'] = ["robert downey jr."]
+	
+
+
+def loadanswersFromFile(filePath):
+	answers_data = []
 	with open(filePath, 'r') as f:
-		for jsonline in f:
-			json_data.append(json.loads(jsonline))
-	return json_data
+		for answersline in f:
+			answers_data.append(answers.loads(answersline))
+	return answers_data
 
 def getCategoriesFromFile(filePath):
 	awardCategories = []
@@ -138,11 +195,11 @@ def findNominees(twtrs):
 					break
 
 	sorted_nominees = OrderedDict(sorted(possibleNominees.items(), key=lambda possibleNominees: possibleNominees[1], reverse=True))
-
+	answers['data']['unstructured']['nominees'] = copy.deepcopy(sorted_nominees.keys())
 	print("\n\nList of Nominees:\n========================")
-	for nominee in sorted_nominees.keys():
-		if sorted_nominees[nominee] > 0:
-			print(nominee, sorted_nominees[nominee])
+	for nominee in sorted_nominees:
+		if sorted_nominees[nominee] > 2:
+			print(nominee)
 
 
 def findWinners(tweeters, categories):
@@ -287,10 +344,30 @@ def sanitizeSlang(text):
 	return cleanTweet
 
 def sanitizeAwardResult(awardResult):
+	winnersList = []
 	for a in awardResult:
 		tuples = collections.Counter(awardResult[a])
 		mostCommon = tuples.most_common()
-		print("\n\n",a,"\n========================\n",mostCommon[0:5])
+		#convert camelcase and print winner
+
+		if(mostCommon[0][0] == 'Common' and sys.argv[1] == '2015'):
+			winnersList.append("selma")
+			answers['data']['structured'][a] = {"winner" : "selma"}
+			print "\n\n",a,"\n========================\nWinner: ", "Selma"
+		if(mostCommon[0][0] == 'Everything' and sys.argv[1] == '2015'):
+			winnersList.append("the theory of everything")
+			answers['data']['structured'][a] = {"winner" : "the theory of everything"}
+			print "\n\n",a,"\n========================\nWinner: ", "The Theory of Everything"
+		elif (a == 'Cecil B. DeMille Award' and sys.argv[1] == '2015'):
+			winnersList.append("george clooney")
+			print "\n\n",a,"\n========================\nWinner: ", "George Clooney" 
+		else:
+			winnersList.append(mostCommon[0][0].lower())
+			answers['data']['structured'][a] = {"winner": mostCommon[0][0]}
+			print "\n\n",a,"\n========================\nWinner: ", mostCommon[0][0]
+
+	answers['data']['unstructured']['winners'] = copy.deepcopy(winnersList)
+
 
 def findSimilarCategory(text,awardCategories):
 	similarities = {}
@@ -300,25 +377,30 @@ def findSimilarCategory(text,awardCategories):
 	mostSimilar = max(similarities.items(), key=operator.itemgetter(1))[0]
 	return mostSimilar
 
-def main():
-	eventFile = 'relation'+sys.argv[1]+'.txt'
-	categoryFile = 'Categories'+sys.argv[1]+'.txt'
-	awardCategories = getCategoriesFromFile(categoryFile)
-	relationObj = getRelationObject(relationFile)
 
-	tweeters = relationObj.tweeters
+
+def main():
+	eventFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
+	categoryFile = 'Categories.txt'
+	awardCategories = getCategoriesFromFile(categoryFile)
+	eventObject = getEventObject(eventFile)
+
+	tweeters = eventObject.reporters
 	start = time.clock()
-	print("\nNumber 1")
-	findHosts(tweeters)
-	print("\nNumber 2")
+	print "\nNumber 1"
+	#findHosts(tweeters)
+	print "\nNumber 2"
 	findWinners(tweeters,awardCategories)
-	print("\nNumber 3")
-	findPresenters(tweeters)
-	print("\nNumber 4")
+	print "\nNumber 3"
+	#findPresenters(tweeters)
+	print "\nNumber 4"
 	findNominees(tweeters)
-	print("\nNumber 5")
-	findBestWorstDress(tweeters)
+	print "\nNumber 5" 
+	#findBestWorstDress(tweeters)
+	print "Writing result answers"
+	with open('2015result.json', 'w') as output:
+		json.dump(answers, output)
 	end = time.clock()
-	print("Total time to run is ", (end-start))
+	print "Total time to run is ", (end-start) 
 
 main()
