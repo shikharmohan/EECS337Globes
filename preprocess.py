@@ -51,7 +51,7 @@ def createRelation(name, top_tweeter_list, word_list, keyword_list, hashtag_list
     Relation.tags = hashtag_list
     Relation.tagwords = keyword_list
 
-    return Event
+    return Relation
 
 #Parses the tweet from the corpus and updates various lists
 def tweetProcess(json_object, keyword_list, tweeter_list, word_list, user_list, atuser_list):
@@ -320,10 +320,10 @@ def main():
                     except:
                         output.write('Error writing tweet to file\r')
 
-    print('Writing Event to event.txt')
+    print('Writing Relation to userTweetRelation.txt')
 
     with open('userTweetRelation.txt', 'wb') as output:
-        pickle.dump(createRelation('Golden Globes', sorted_users.values(), words, popular_keywords, hashtags), output)
+        pickle.dump(createRelation('Golden Globes', sorted_users.values(), words, sorted_keywords.values(), hashtags), output)
 
     print('Writing atuser tweets to atusers.txt')
 

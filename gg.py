@@ -298,7 +298,6 @@ def findSimilarCategory(text,awardCategories):
 		seq = difflib.SequenceMatcher(a=text.lower(), b=award.lower())
 		similarities[award] = seq.ratio()
 	mostSimilar = max(similarities.items(), key=operator.itemgetter(1))[0]
-
 	return mostSimilar
 
 def main():
