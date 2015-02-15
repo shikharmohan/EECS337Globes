@@ -28,7 +28,7 @@ answers = {
             },
     "awards": {
             "method": "detected",
-            "method_description": ""
+            "method_description": "Applied scores to tweeters and tweets, higher scores are more relevant. Used regex, proper noun extractor & keywords like nominated, wish, hope etc. to filter tweets"
             },
         "presenters": {
             "method": "hardcoded",

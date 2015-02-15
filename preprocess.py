@@ -10,7 +10,7 @@ import sys
 from classes import *
 from collections import OrderedDict
 
-if(sys.argv[1] =='gg15mini'):
+if(sys.argv[1] =='gg15mini.json'):
     year = 2015
 else:
     year = 2013
