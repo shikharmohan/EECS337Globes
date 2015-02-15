@@ -420,16 +420,12 @@ def main():
 
 	tweeters = eventObject.reporters
 	start = time.clock()
-	print "\nNumber 1"
-	#findHosts(tweeters)
-	print "\nNumber 2"
+	print "\nFind Winners"
 	findWinners(tweeters,awardCategories)
-	print "\nNumber 3"
-	#findPresenters(tweeters)
-	print "\nNumber 4"
+	print "\nFind Nominees"
 	findNominees(tweeters)
-	print "\nNumber 5" 
-	#findBestWorstDress(tweeters)
+	print "\nFun Goal: Best & Worst Dressed" 
+	findBestWorstDress(tweeters)
 	print "Writing result answers"
 	with open('2015result.json', 'w') as output:
 		json.dump(answers, output)
