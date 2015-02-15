@@ -11,11 +11,11 @@ class tweet:
         self.score = 1
         self.tweetId = 0
 
-class event:
+class relation:
     def __init__(self):
         self.name = ''
         self.id = 0
-        self.reporters = []     #Top Tweeters list
-        self.tags = {}          #Hashtag dict
-        self.tagwords = {}      #Keyword dict
-        self.words_dict = {}    #Words dict
+        self.reporters = []     
+        self.tags = {}          
+        self.tagwords = {}      
+        self.words_dict = {}    

@@ -113,9 +113,9 @@ def getCategoriesFromFile(filePath):
 
 	return awardCategories
 
-def getEventObject(filePath):
-	eventObject = pickle.load( open( filePath, "rb" ) )
-	return eventObject
+def getRelationObject(filePath):
+	relationObject = pickle.load( open( filePath, "rb" ) )
+	return relationObject
 
 def getProperNouns(filePath):
 	properNouns =[]
@@ -411,14 +411,13 @@ def findSimilarCategory(text,awardCategories):
 	return mostSimilar
 
 
-
 def main():
-	eventFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
+	relationFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
 	categoryFile = 'Categories.txt'
 	awardCategories = getCategoriesFromFile(categoryFile)
-	eventObject = getEventObject(eventFile)
+	relationObject = getRelationObject(relationFile)
 
-	tweeters = eventObject.reporters
+	tweeters = relationObject.reporters
 	start = time.clock()
 	print "\nFind Winners"
 	findWinners(tweeters,awardCategories)
