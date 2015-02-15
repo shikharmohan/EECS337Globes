@@ -403,6 +403,14 @@ def sanitizeAwardResult(awardResult):
 
 	answers['data']['unstructured']['winners'] = copy.deepcopy(winnersList)
 
+		# print "\n\n"
+		# print a
+		# print "\n========================\n"
+		# print "Nominees:\n"
+		# for c in mostCommon[0:5]:
+		# 	print c[0]
+		# print "And the winner is...\n"
+		# print mostCommon[0][0]
 
 def findSimilarCategory(text,awardCategories):
 	similarities = {}
@@ -430,6 +438,16 @@ def main():
 	print "Writing result answers"
 	with open(str(year)+'result.json', 'w') as output:
 		json.dump(answers, output)
+	# # print("\nNumber 1")
+	# # findHosts(tweeters)
+	# print("\nNumber 2")
+	# findWinners(tweeters,awardCategories)
+	# # print("\nNumber 3")
+	# # findPresenters(tweeters)
+	# # print("\nNumber 4")
+	# # findNominees(tweeters)
+	# # print("\nNumber 5")
+	# # findBestWorstDress(tweeters)
 	end = time.clock()
 	print "Total time to run is ", (end-start) 
 
