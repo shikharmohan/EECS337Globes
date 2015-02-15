@@ -81,8 +81,9 @@ catToAwards = {"Cecil B. DeMille Award" : "Cecil B. DeMille Award",
 "Best Supporting Actress in a Series, Mini-Series or Motion Picture made for Television": "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television",
 "Best Supporting Actor in a Series, Mini-Series or Motion Picture made for Television" : "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"}
 
-
+year = 2015
 if(sys.argv[1] == '2015'):
+	year = 2015
 	answers['metadata']['year'] = 2015
 	answers['data']['unstructured']['hosts'] = ['Amy Poehler', 'Tina Fey']
 	answers['data']['unstructured']['awards'] = ["Cecil B. DeMille Award", "Best Motion Picture - Drama", "Best Performance by an Actress in a Motion Picture - Drama", "Best Performance by an Actor in a Motion Picture - Drama", "Best Motion Picture - Comedy Or Musical", "Best Performance by an Actress in a Motion Picture - Comedy Or Musical", "Best Performance by an Actor in a Motion Picture - Comedy Or Musical", "Best Animated Feature Film", "Best Foreign Language Film", "Best Performance by an Actress In A Supporting Role in a Motion Picture", "Best Performance by an Actor In A Supporting Role in a Motion Picture", "Best Director - Motion Picture", "Best Screenplay - Motion Picture", "Best Original Score - Motion Picture", "Best Original Song - Motion Picture", "Best Television Series - Drama", "Best Performance by an Actress In A Television Series - Drama", "Best Performance by an Actor In A Television Series - Drama", "Best Television Series - Comedy Or Musical", "Best Performance by an Actress In A Television Series - Comedy Or Musical", "Best Performance by an Actor In A Television Series - Comedy Or Musical", "Best Mini-Series Or Motion Picture Made for Television", "Best Performance by an Actress In A Mini-series or Motion Picture Made for Television", "Best Performance by an Actor in a Mini-Series or Motion Picture Made for Television", "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television", "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"]
@@ -90,6 +91,7 @@ if(sys.argv[1] == '2015'):
 	answers['data']['structured']['Cecil B. DeMille Award']['winner'] = "George Clooney" 
 	answers['data']['structured']['Cecil B. DeMille Award']['presenters'] = ["don cheadle", "julianna margulies"]
 else:
+	year = 2013
 	answers['metadata']['year'] = 2013
 	answers['data']['unstructured']['hosts'] = ['Amy Poehler', 'Tina Fey']
 	answers['data']['unstructured']['awards'] = ["Cecil B. DeMille Award", "Best Motion Picture - Drama", "Best Performance by an Actress in a Motion Picture - Drama", "Best Performance by an Actor in a Motion Picture - Drama", "Best Motion Picture - Comedy Or Musical", "Best Performance by an Actress in a Motion Picture - Comedy Or Musical", "Best Performance by an Actor in a Motion Picture - Comedy Or Musical", "Best Animated Feature Film", "Best Foreign Language Film", "Best Performance by an Actress In A Supporting Role in a Motion Picture", "Best Performance by an Actor In A Supporting Role in a Motion Picture", "Best Director - Motion Picture", "Best Screenplay - Motion Picture", "Best Original Score - Motion Picture", "Best Original Song - Motion Picture", "Best Television Series - Drama", "Best Performance by an Actress In A Television Series - Drama", "Best Performance by an Actor In A Television Series - Drama", "Best Television Series - Comedy Or Musical", "Best Performance by an Actress In A Television Series - Comedy Or Musical", "Best Performance by an Actor In A Television Series - Comedy Or Musical", "Best Mini-Series Or Motion Picture Made for Television", "Best Performance by an Actress In A Mini-series or Motion Picture Made for Television", "Best Performance by an Actor in a Mini-Series or Motion Picture Made for Television", "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television", "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"]
@@ -426,7 +428,7 @@ def main():
 	print "\nFun Goal: Best & Worst Dressed" 
 	findBestWorstDress(tweeters)
 	print "Writing result answers"
-	with open('2015result.json', 'w') as output:
+	with open(str(year)+'result.json', 'w') as output:
 		json.dump(answers, output)
 	end = time.clock()
 	print "Total time to run is ", (end-start) 

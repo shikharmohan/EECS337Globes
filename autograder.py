@@ -2,7 +2,6 @@ import json
 import sys
 from nltk.metrics import edit_distance,masi_distance
 import difflib
-import pdb
 from collections import Counter
 from pprint import pprint
 
@@ -279,7 +278,6 @@ def main(filename):
     unstructuredstring = ""
     for item in results['data']['unstructured']:
         weight = len(answers['unstructured'][item])
-        pdb.set_trace()
         if item in results['metadata']:
             results['metadata'] = check_metadata(item, results['metadata'])
             weight = weight*(methods_to_decision[results['metadata'][item]['method']]-1.0)/2.0
