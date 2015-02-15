@@ -213,7 +213,7 @@ def main():
     for item in json_data:
         progress = progress + 1
         if progress % 10000 == 0:
-            print str(progress) + 'tweets processed'
+            print str(progress) + ' tweets processed'
         try:
             processTweets(item, hashtags, tweeters, words, userIdTable, mentionUser_tweeters)
         except:
@@ -223,6 +223,8 @@ def main():
 
     #Start Program
     print('Loading ', json_file, '...')
+
+    
 
     #Pick out keywords from the word list using the hashtags
     print('Finding keywords')
@@ -302,7 +304,7 @@ def main():
 
     print('Writing userTweetRelation to userTweetRelationYEAR.txt')
     with open('userTweetRelation'+str(year)+'.txt', 'wb') as output:
-        pickle.dump(awardRelation, output)
+        pickle.dump(userTweetRelation, output)
 
     #Program is complete
     print('Processing Complete')
