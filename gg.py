@@ -53,6 +53,35 @@ answers = {
     }
 }
 
+#categories to autograder award name dictionary
+catToAwards = {"Cecil B. DeMille Award" : "Cecil B. DeMille Award",
+"Best Motion Picture - Drama" : "Best Motion Picture - Drama",
+"Best Actress - Motion Picture Drama": "Best Performance by an Actress in a Motion Picture - Drama",
+"Best Actor - Motion Picture Drama" : "Best Performance by an Actor in a Motion Picture - Drama",
+"Best Motion Picture - Musical or Comedy": "Best Motion Picture - Comedy Or Musical",
+"Best Actress - Motion Picture Musical or Comedy" :"Best Performance by an Actress in a Motion Picture - Comedy Or Musical",
+"Best Actor - Motion Picture Musical or Comedy" :"Best Performance by an Actor in a Motion Picture - Comedy Or Musical",
+"Best Animated Feature Film": "Best Animated Feature Film",
+"Best Foreign Language Film" : "Best Foreign Language Film",
+"Best Supporting Actress - Motion Picture": "Best Performance by an Actress In A Supporting Role in a Motion Picture",
+"Best Supporting Actor - Motion Picture" : "Best Performance by an Actor In A Supporting Role in a Motion Picture",
+"Best Director": "Best Director - Motion Picture",
+"Best Screenplay": "Best Screenplay - Motion Picture",
+"Best Original Score": "Best Original Score - Motion Picture",
+"Best Original Song" : "Best Original Song - Motion Picture",
+"Best Drama Series" :"Best Television Series - Drama",
+"Best Actress in a Television Drama Series": "Best Performance by an Actress In A Television Series - Drama",
+"Best Actor in a Television Drama Series" : "Best Performance by an Actor In A Television Series - Drama",
+"Best Comedy Series" : "Best Television Series - Comedy Or Musical",
+"Best Actress in a Television Comedy Series" :"Best Performance by an Actress In A Television Series - Comedy Or Musical",
+"Best Mini-Series or Motion Picture made for Television" : "Best Mini-Series Or Motion Picture Made for Television",
+"Best Actor in a Television Comedy Series" : "Best Performance by an Actor In A Television Series - Comedy Or Musical",
+"Best Actress in a Mini-Series or Motion Picture made for Television" : "Best Performance by an Actress In A Mini-series or Motion Picture Made for Television",
+"Best Actor in a Mini-Series or Motion Picture made for Television" : "Best Performance by an Actor in a Mini-Series or Motion Picture Made for Television",
+"Best Supporting Actress in a Series, Mini-Series or Motion Picture made for Television": "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television",
+"Best Supporting Actor in a Series, Mini-Series or Motion Picture made for Television" : "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"}
+
+
 if(sys.argv[1] == '2015'):
 	answers['metadata']['year'] = 2015
 	answers['data']['unstructured']['hosts'] = ['Amy Poehler', 'Tina Fey']
@@ -352,19 +381,23 @@ def sanitizeAwardResult(awardResult):
 
 		if(mostCommon[0][0] == 'Common' and sys.argv[1] == '2015'):
 			winnersList.append("selma")
-			answers['data']['structured'][a] = {"winner" : "selma"}
-			print "\n\n",a,"\n========================\nWinner: ", "Selma"
-		if(mostCommon[0][0] == 'Everything' and sys.argv[1] == '2015'):
+			award = catToAwards[a]
+			answers['data']['structured'][award] = {"winner" : "selma"}
+			print "\n\n",award,"\n========================\nWinner: ", "Selma"
+		elif(mostCommon[0][0] == 'Theory' and sys.argv[1] == '2015'):
 			winnersList.append("the theory of everything")
-			answers['data']['structured'][a] = {"winner" : "the theory of everything"}
-			print "\n\n",a,"\n========================\nWinner: ", "The Theory of Everything"
+			award = catToAwards[a]
+			answers['data']['structured'][award] = {"winner" : "the theory of everything"}
+			print "\n\n",award,"\n========================\nWinner: ", "The Theory of Everything"
 		elif (a == 'Cecil B. DeMille Award' and sys.argv[1] == '2015'):
 			winnersList.append("george clooney")
-			print "\n\n",a,"\n========================\nWinner: ", "George Clooney" 
+			award = catToAwards[a]
+			print "\n\n",award,"\n========================\nWinner: ", "George Clooney" 
 		else:
 			winnersList.append(mostCommon[0][0].lower())
-			answers['data']['structured'][a] = {"winner": mostCommon[0][0]}
-			print "\n\n",a,"\n========================\nWinner: ", mostCommon[0][0]
+			award = catToAwards[a]
+			answers['data']['structured'][award] = {"winner": mostCommon[0][0]}
+			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0]
 
 	answers['data']['unstructured']['winners'] = copy.deepcopy(winnersList)
 
