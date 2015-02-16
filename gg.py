@@ -258,7 +258,6 @@ def findDrunkPeople(tweeters):
 				for pn in properNoun:
 					if len(pn.split())==2 :
 						if pat == 'drunk':
-							print twt.text
 							possibleParties.append(pn)
 
 	data = collections.Counter(possibleParties)
