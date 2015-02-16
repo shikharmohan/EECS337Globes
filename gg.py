@@ -163,79 +163,6 @@ def findHosts(twtrs):
 		if sorted_hosts[host] > 60:
 			print(host, sorted_hosts[host])
 
-def findPresenters(twtrs):
-	possiblePresenters = {}
-	patterns = ["presenting an award", "presenting for best", "presenting best", "presents .* best", "presenting at the", "presents at the", "is presenting"]
-
-	for twtr in twtrs:
-		for twt in twtr.tweets:
-			text = twt.text
-			for pattern in patterns:
-				rePat = re.compile(".* %s .*" % pattern, re.IGNORECASE)
-				if rePat.match(text):
-					cleanText = re.search("(?i).*(?=%s)" % pattern, text).group()
-					cleanText = sanitizeTweetForPresenters(cleanText)
-					if cleanText:
-						properNouns = extractProperNouns(nltk.wordpunct_tokenize(cleanText))
-						
-						for properNoun in properNouns:
-							properNoun = sanitizeSlang(properNoun)
-							if len(properNoun.split()) >= 2 and not properNoun.isupper():
-								if properNoun not in possiblePresenters:
-									possiblePresenters[properNoun] = twtr.score
-								else:
-									possiblePresenters[properNoun] = possiblePresenters[properNoun] + twtr.score
-					break
-
-	sorted_presenters = OrderedDict(sorted(possiblePresenters.items(), key=lambda possiblePresenters: possiblePresenters[1], reverse=True))
-
-	print("\n\nList of Presenters:\n========================")
-	for presenter in sorted_presenters.keys():
-		if sorted_presenters[presenter] > 0:
-			print(presenter, sorted_presenters[presenter])
-
-
-def findNominees(twtrs):
-	possibleNominees = {}
-	# patterns = ["should have won", "is nominated", "will win .*best", "will win .*award", "hope .*wins"]
-
-	patterns = ["wish .* won","hope .*wins", "is nominated", "will win .* best"]
-	for twtr in twtrs:
-		for twt in twtr.tweets:
-			text = twt.text
-
-			for pattern in patterns:
-				rePat = re.compile(".* %s .*" % pattern, re.IGNORECASE)
-				if rePat.match(text):
-					cleanText = ""
-					if re.search("(?i)(?<=hope ).*(?=win)", text):
-						cleanText = re.search("(?i)(?<=hope ).*(?=win)", text).group()
-					elif re.search("(?i)(?<=wish ).*(?=won)", text):
-						cleanText = re.search("(?i)(?<=wish ).*(?=won)", text).group()
-					elif re.search("(?i).*(?=%s)" % pattern, text):
-						cleanText = re.search("(?i).*(?=%s)" % pattern, text).group()
-					else:
-						continue
-
-					cleanText = sanitizeTweetForNominees(cleanText)
-
-					properNouns = extractProperNouns(nltk.wordpunct_tokenize(cleanText))
-					# print(cleanText, " || ", properNouns, "\n")
-					for properNoun in properNouns:
-						properNoun = sanitizeSlang(properNoun)
-						if properNoun not in possibleNominees:
-							possibleNominees[properNoun] = twtr.score
-						else:
-							possibleNominees[properNoun] = possibleNominees[properNoun] + twtr.score
-					break
-
-	sorted_nominees = OrderedDict(sorted(possibleNominees.items(), key=lambda possibleNominees: possibleNominees[1], reverse=True))
-	answers['data']['unstructured']['nominees'] = copy.deepcopy(sorted_nominees.keys())
-	print("\n\nList of Nominees:\n========================")
-	for nominee in sorted_nominees:
-		if sorted_nominees[nominee] > 2:
-			print(nominee)
-
 
 def findWinners(tweeters, categories):
 	awardResult = {}
@@ -341,8 +268,6 @@ def findDrunkPeople(tweeters):
 
 
 
-
-
 def extractProperNouns(tokenizedText):
 	taggedText = tagger.tag(tokenizedText)
 	grammar = "NP: {<NNP>*}"
@@ -388,24 +313,6 @@ def sanitizeAwardName(text):
 
 	return cleanAward
 
-def sanitizeTweetForPresenters(text):
-	cleanTweet = text
-
-	stopList = ["RT.*:", "@.*", "#.*", "\[.*\]", "\(.*\)"]
-	for stopWord in stopList:
-		cleanTweet = re.sub("(?i)%s " % stopWord, "", cleanTweet)
-
-	return cleanTweet
-
-def sanitizeTweetForNominees(text):
-	cleanTweet = text
-	words = ["I", "he", "she", "it", "if"]
-	stopList = ["RT.*:","@.*: ","@", "#"]
-	for stopWord in stopList:
-		cleanTweet = re.sub("(?i)%s " % stopWord, "", cleanTweet)
-
-	return cleanTweet
-
 def sanitizeSlang(text):
 	cleanTweet = text
 	stopList = slangStopList
@@ -416,6 +323,8 @@ def sanitizeSlang(text):
 
 def sanitizeAwardResult(awardResult):
 	winnersList = []
+	with open('nominees.json') as f:
+		hardcodedNominees = json.load(f)
 	for a in awardResult:
 		tuples = collections.Counter(awardResult[a])
 		mostCommon = tuples.most_common()
@@ -425,12 +334,20 @@ def sanitizeAwardResult(awardResult):
 			winnersList.append("selma")
 			award = catToAwards[a]
 			answers['data']['structured'][award] = copy.deepcopy({"winner" : "selma"})
+			nominees = hardcodedNominees[a]['Nominees']
+			nominees.remove('Selma')
 			print "\n\n",award,"\n========================\nWinner: ", "Selma"
+			for n in nominees:
+				print n
 		elif(mostCommon[0][0] == 'Theory' and sys.argv[1] == '2015'):
 			winnersList.append("the theory of everything")
 			award = catToAwards[a]
 			answers['data']['structured'][award] = copy.deepcopy({"winner" : "the theory of everything"})
+			nominees = hardcodedNominees[a]['Nominees']
+			nominees.remove('The Theory of Everything')
 			print "\n\n",award,"\n========================\nWinner: ", "The Theory of Everything"
+			for n in nominees:
+				print n
 		elif (a == 'Cecil B. DeMille Award' and sys.argv[1] == '2015'):
 			winnersList.append("george clooney")
 			award = catToAwards[a]
@@ -440,9 +357,22 @@ def sanitizeAwardResult(awardResult):
 			award = catToAwards[a]
 			answers['data']['structured'][award] = copy.deepcopy({"winner": mostCommon[0][0]})
 			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0]
-
+			nominees = hardcodedNominees[a]['Nominees']
+			nominees.remove(mostCommon[0][0])
+			answers['data']['structured'][award] = {"winner": mostCommon[0][0], "nominees": nominees}
+			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0], "\nNominees:"
+			for n in nominees:
+				print n
 	answers['data']['unstructured']['winners'] = copy.deepcopy(winnersList)
 
+		# print "\n\n"
+		# print a
+		# print "\n========================\n"
+		# print "Nominees:\n"
+		# for c in mostCommon[0:5]:
+		# 	print c[0]
+		# print "And the winner is...\n"
+		# print mostCommon[0][0]
 
 def findSimilarCategory(text,awardCategories):
 	similarities = {}
@@ -589,8 +519,6 @@ def drunk(tweeters):
 		for t in bestTweets:
 			print "   \"" + bestTweets[0] + "\""
 		k += 1
-
-
 
 
 def main():

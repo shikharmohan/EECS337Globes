@@ -1,0 +1,229 @@
+{
+    "Best Motion Picture - Drama": {
+        "Nominees": [
+            "Boyhood",
+            "Foxcatcher",
+            "The Imitation Game",
+            "Selma",
+            "The Theory of Everything"
+        ]
+    },
+    "Best Actress - Motion Picture Drama": {
+        "Nominees": [
+            "Julianne Moore",
+            "Rosamund Pike",
+            "Reese Witherspoon",
+            "Felicity Jones",
+            "Jennifer Aniston"
+        ]
+    },
+    "Best Actor - Motion Picture Drama": {
+        "Nominees": [
+            "Eddie Redmayne",
+            "Steve Carell",
+            "Benedict Cumberbatch",
+            "David Oyelowo",
+            "Jake Gyllenhaal"
+        ]
+    },
+    "Best Motion Picture - Musical or Comedy": {
+        "Nominees": [
+            "Into The Woods",
+            "Birdman",
+            "Grand Budapest Hotel",
+            "St. Vincent",
+            "Pride"
+        ]
+    },
+    "Best Actress - Motion Picture Musical or Comedy": {
+        "Nominees": [
+            "Julianne Moore",
+            "Amy Adams",
+            "Emily Blunt",
+            "Helen Mirren",
+            "Quvenzhane Wallis"
+        ]
+    },
+    "Best Actor - Motion Picture Musical or Comedy": {
+        "Nominees": [
+            "Michael Keaton",
+            "Bill Murray",
+            "Ralph Fiennes",
+            "Christoph Waltz",
+            "Joaquin Phoenix"
+        ]
+    },
+    "Best Animated Feature Film": {
+        "Nominees": [
+            "The Lego Movie",
+            "Train Your Dragon",
+            "Big Hero 6",
+            "The Book of Life",
+            "The Boxtrolls"
+        ]
+    },
+    "Best Foreign Language Film": {
+        "Nominees": [
+            "Ida",
+            "Force Majeure",
+            "Gett: The Trial of Viviane Amsalem",
+            "Tangerines",
+            "Leviathan"
+        ]
+    },
+    "Best Supporting Actress - Motion Picture": {
+        "Type" :"Person",
+        "Nominees": [
+            "Jessica Chastain",
+            "Keira Knightley",
+            "Patricia Arquette",
+            "Meryl Streep",
+            "Emma Stone"
+        ]
+    },
+    "Best Supporting Actor - Motion Picture": {
+        "Nominees": [
+            "Ethan Hawke",
+            "Robert Duvall",
+            "Edward Norton",
+            "JK Simmons",
+            "Mark Ruffalo"
+        ]
+    },
+    "Best Director": {
+        "Nominees": [
+            "Ava DuVernay",
+            "Wes Anderson",
+            "Alejandro Gonzalez",
+            "David Fincher",
+            "Richard Linklater"
+        ]
+    },
+    "Best Screenplay": {
+        "Nominees": [
+            "The Grand Budapest Hotel",
+            "Gone Girl",
+            "Birdman",
+            "Boyhood",
+            "The Imitation Game"
+        ]
+    },
+    "Best Original Score": {
+        "Nominees": [
+            "The Imitation Game",
+            "The Theory of Everything",
+            "Gone Girl",
+            "Interstellar",
+            "Birdman"
+        ]
+    },
+    "Best Original Song": {
+        "Nominees": [
+            "Big Eyes",
+            "Selma",
+            "Noah",
+            "Annie",
+            "The Hunger Games: Mockingjay, Part 1"
+        ]
+    },
+    "Best Drama Series": {
+        "Nominees": [
+            "Downtown Abbey",
+            "Affair",
+            "Game Of Thrones",
+            "House of Cards",
+            "Good Wife"
+        ]
+    },
+    "Best Actress in a Television Drama Series": {
+        "Nominees": [
+            "Viola Davis",
+            "Claire Danes",
+            "Julianna Margulies",
+            "Robin Wright",
+            "Ruth Wilson"
+        ]
+    },
+    "Best Actor in a Television Drama Series": {
+        "Nominees": [
+            "Kevin Spacey",
+            "Clive Owen",
+            "James Spader",
+            "Dominic West",
+            "Liev Schreiber"
+        ]
+    },
+    "Best Comedy Series": {
+        "Nominees": [
+            "Orange is the New Black",
+            "Girls",
+            "Jane the Virgin",
+            "Transparent",
+            "Silicon Valley"
+        ]
+    },
+    "Best Actress in a Television Comedy Series": {
+        "Nominees": [
+
+            "Julia Louis-Dreyfus",
+            "Edie Falco",
+            "Gina Rodriguez",
+            "Lena Dunham",
+            "Taylor Schilling"
+        ]
+    },
+    "Best Actor in a Television Comedy Series": {
+        "Nominees": [
+            "Don Cheadle",
+            "William H. Macy",
+            "Ricky Gervais",
+            "Jeffrey Tambor",
+            "Louie C.K."
+        ]
+    },
+    "Best Mini-Series or Motion Picture made for Television": {
+        "Nominees": [
+            "Olive Kitteridge",
+            "Fargo",
+            "The Missing",
+            "True Detective",
+            "The Normal Heart"
+        ]
+    },
+    "Best Actress in a Mini-Series or Motion Picture made for Television": {
+        "Nominees": [
+            "Jessica Lange",
+            "Maggie Gyllenhaal",
+            "Frances McDormand",
+            "Allison Tolman",
+            "Frances O'Connor "
+        ]
+    },
+    "Best Actor in a Mini-Series or Motion Picture made for Television": {
+        "Nominees": [
+            "Martin Freeman",
+            "Matthew McConaughey",
+            "Woody Harrelson",
+            "Bob Thornton",
+            "Mark Ruffalo"
+        ]
+    },
+    "Best Supporting Actress in a Series, Mini-Series or Motion Picture made for Television": {
+        "Nominees": [
+            "Kathy Bates",
+            "Uzo Aduba",
+            "Joanne Froggatt",
+            "Michelle Monaghan",
+            "Allison Janney"
+        ]
+    },
+    "Best Supporting Actor in a Series, Mini-Series or Motion Picture made for Television": {
+        "Nominees": [
+            "Bill Murray",
+            "Jon Voight",
+            "Matt Bomer",
+            "Alan Cumming",
+            "Colin Hanks"
+        ]
+    }
+}
