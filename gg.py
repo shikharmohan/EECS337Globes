@@ -422,6 +422,9 @@ def dressed(tweeters):
 	j = 0
 	best = {}
 	worst = {}
+	if(len(rankedRxn) < 1):
+		print "Alchemy API Limit Exceeded"
+		return
 	while j < 5:
 		r = rankedRxn[i]
 		if 'disambiguated' not in r.keys():
@@ -505,6 +508,9 @@ def drunk(tweeters):
 	i = 0
 	j = 0
 	best = {}
+	if(len(rankedRx) < 1):
+		print "Alchemy API Limit Exceeded"
+		return
 	while j < 5:
 		rank = rankedRx[-i]
 		if 'disambiguated' not in rank.keys():
@@ -550,7 +556,7 @@ def main():
 
 	print "\nFun Goal: Best & Worst Dressed" 
 	#uses matching + regex, "wears"
-	print "\nBest & Worst Dressed Using Regex/Unigram\n"
+	print "\nBest & Worst Dressed Using Regex\n"
 	findBestWorstDress(tweeters)
 
 	print "\nBest & Worst Dressed + Tweets Using AlchemyAPI\n"
@@ -562,7 +568,7 @@ def main():
 	#uses sentiment (alchemy) and pulls tweets based on sentiment
 	drunk(tweeters)
 	
-	print "\nBest & Worst Dressed Using Regex/Unigram\n"
+	print "\nBest & Worst Dressed Using Regex\n"
 	#uses matching + regex
 	findDrunkPeople(tweeters)
 
