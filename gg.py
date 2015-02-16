@@ -4,8 +4,7 @@ import operator
 import re
 import collections, difflib
 import pickle
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template, jsonify, request
 from classes import *
 import time
 import sys
@@ -17,6 +16,42 @@ from operator import itemgetter
 from collections import OrderedDict
 
 alchemy = AlchemyAPI()
+app = Flask(__name__, static_folder='static', static_url_path='')
+
+@app.route('/_set_year')
+def set_year():
+  year = request.args.get('a', 0, type=int)
+  relationFile = 'relation'+year+'.txt'
+	categoryFile = 'Categories'+year+'.txt'
+	awardCategories = getCategoriesFromFile(categoryFile)
+	relationObj = getRelationObject(relationFile)
+
+	tweeters = relationObj.tweeters
+	start = time.clock()
+	print("\nNumber 1")
+	findHosts(tweeters)
+	print("\nNumber 2")
+	findWinners(tweeters,awardCategories)
+	print("\nNumber 3")
+	findPresenters(tweeters)
+	print("\nNumber 4")
+	findNominees(tweeters)
+	print("\nNumber 5")
+	findBestWorstDress(tweeters)
+	end = time.clock()
+	print("Total time to run is ", (end-start))
+  return jsonify(result=year)
+
+if sys.argv[1] == 'web':
+	@app.route('/')
+	def hello(name=None):
+	    return render_template('index.html', name=name)
+
+	if __name__ == '__main__':
+	    app.run(debug=True)
+else:
+	main()
+
 gg = ['Golden Globes', 'GoldenGlobes', 'golden globes']
 awardNameStopList = ['at', 'the', 'for']
 slangStopList = ["omg", "lol", "ha*ha", "ja.*ja", "na.*na", "wow", "idk", "wtf"]
@@ -143,6 +178,7 @@ def findHostTweets(text):
 
 	return hostMentioned
 
+@app.route('/findHosts')
 def findHosts(twtrs):
 	possibleHosts = {}
 
@@ -526,15 +562,6 @@ def drunk(tweeters):
 
 
 def main():
-	if sys.argv[1] == 'web':
-		app = Flask(__name__, static_folder='static', static_url_path='')
-
-		@app.route('/')
-		def hello(name=None):
-		    return render_template('index.html', name=name)
-
-		if __name__ == '__main__':
-		    app.run()
 	relationFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
 	categoryFile = 'Categories.txt'
 	awardCategories = getCategoriesFromFile(categoryFile)
@@ -572,5 +599,3 @@ def main():
 		json.dump(answers, output)
 	end = time.clock()
 	print "Total time to run is ", (end-start) 
-
-main()
