@@ -13,6 +13,7 @@ from collections import OrderedDict
 if(sys.argv[1] =='gg15mini.json'):
     year = 2015
 else:
+    pdb.set_trace()
     year = 2013
 
 def keywordCheck(string):

@@ -8,8 +8,13 @@ from classes import *
 import time
 import sys
 import copy
+import random
+import pdb
+from alchemyapi import *
+from operator import itemgetter
 from collections import OrderedDict
 
+alchemy = AlchemyAPI()
 gg = ['Golden Globes', 'GoldenGlobes', 'golden globes']
 awardNameStopList = ['at', 'the', 'for']
 slangStopList = ["omg", "lol", "ha*ha", "ja.*ja", "na.*na", "wow", "idk", "wtf"]
@@ -88,7 +93,7 @@ if(sys.argv[1] == '2015'):
 	answers['data']['unstructured']['hosts'] = ['Amy Poehler', 'Tina Fey']
 	answers['data']['unstructured']['awards'] = ["Cecil B. DeMille Award", "Best Motion Picture - Drama", "Best Performance by an Actress in a Motion Picture - Drama", "Best Performance by an Actor in a Motion Picture - Drama", "Best Motion Picture - Comedy Or Musical", "Best Performance by an Actress in a Motion Picture - Comedy Or Musical", "Best Performance by an Actor in a Motion Picture - Comedy Or Musical", "Best Animated Feature Film", "Best Foreign Language Film", "Best Performance by an Actress In A Supporting Role in a Motion Picture", "Best Performance by an Actor In A Supporting Role in a Motion Picture", "Best Director - Motion Picture", "Best Screenplay - Motion Picture", "Best Original Score - Motion Picture", "Best Original Song - Motion Picture", "Best Television Series - Drama", "Best Performance by an Actress In A Television Series - Drama", "Best Performance by an Actor In A Television Series - Drama", "Best Television Series - Comedy Or Musical", "Best Performance by an Actress In A Television Series - Comedy Or Musical", "Best Performance by an Actor In A Television Series - Comedy Or Musical", "Best Mini-Series Or Motion Picture Made for Television", "Best Performance by an Actress In A Mini-series or Motion Picture Made for Television", "Best Performance by an Actor in a Mini-Series or Motion Picture Made for Television", "Best Performance by an Actress in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television", "Best Performance by an Actor in a Supporting Role in a Series, Mini-Series or Motion Picture Made for Television"]
 	answers['data']['unstructured']['presenters'] = ["vince vaughn", "kate beckinsale", "harrison ford", "chris pratt", "lupita nyong'o", "colin farrell", "gwyneth paltrow", "katherine heigl", "don cheadle", "jane fonda", "jennifer aniston", "kristen wiig", "adrien brody", "david duchovny", "prince", "adam levine", "kevin hart", "jeremy renner", "bryan cranston", "matthew mcconaughey", "sienna miller", "benedict cumberbatch", "katie holmes", "salma hayek", "meryl streep", "jennifer lopez", "anna faris", "lily tomlin", "amy adams", "jamie dornan", "jared leto", "kerry washington", "ricky gervais", "robert downey, jr.", "bill hader", "paul rudd", "dakota johnson", "seth meyers", "julianna margulies"]
-	answers['data']['structured']['Cecil B. DeMille Award']['winner'] = "George Clooney" 
+	answers['data']['structured']['Cecil B. DeMille Award']['winner'] = "george clooney" 
 	answers['data']['structured']['Cecil B. DeMille Award']['presenters'] = ["don cheadle", "julianna margulies"]
 else:
 	year = 2013
@@ -195,7 +200,6 @@ def findNominees(twtrs):
 	# patterns = ["should have won", "is nominated", "will win .*best", "will win .*award", "hope .*wins"]
 
 	patterns = ["wish .* won","hope .*wins", "is nominated", "will win .* best"]
-
 	for twtr in twtrs:
 		for twt in twtr.tweets:
 			text = twt.text
@@ -262,7 +266,6 @@ def findWinners(tweeters, categories):
 							awardResult[mostSimilarAward] = properNoun
 		THRESHOLD = THRESHOLD -1
 		if THRESHOLD<1:
-			print("THRESHOLD MET")
 			break
 
 	sanitizeAwardResult(awardResult)
@@ -302,6 +305,43 @@ def findBestWorstDress(tweeters):
 	print("\n\nList of Worst Dressed:\n========================")
 	for host in worstData.most_common()[0:5]:
 		print(host[0])
+
+
+def findDrunkPeople(tweeters):
+	possibleParties = []
+	partyPattern = re.compile(".*drunk.*",re.IGNORECASE)
+	pat = ""
+	i = 0
+	for twtr in tweeters:
+		i += 1
+		if i > 1000000:
+			break
+		for twt in twtr.tweets:
+			i += 1
+			properNoun =[]
+			if partyPattern.match(twt.text):
+				pat = "drunk"
+			else:
+				continue
+			firstHalfOfTweet = re.search("(?i).*(?=%s)" % pat,twt.text)
+			tokenizedText = nltk.wordpunct_tokenize(firstHalfOfTweet.group())
+
+			if tokenizedText:
+				properNoun = extractProperNouns(tokenizedText)
+				for pn in properNoun:
+					if len(pn.split())==2 :
+						if pat == 'drunk':
+							print twt.text
+							possibleParties.append(pn)
+
+	data = collections.Counter(possibleParties)
+	print("\n\nList of Drunk People at After Party:\n========================")
+	for host in data.most_common()[0:15]:
+		print(host[0])
+
+
+
+
 
 def extractProperNouns(tokenizedText):
 	taggedText = tagger.tag(tokenizedText)
@@ -384,12 +424,12 @@ def sanitizeAwardResult(awardResult):
 		if(mostCommon[0][0] == 'Common' and sys.argv[1] == '2015'):
 			winnersList.append("selma")
 			award = catToAwards[a]
-			answers['data']['structured'][award] = {"winner" : "selma"}
+			answers['data']['structured'][award] = copy.deepcopy({"winner" : "selma"})
 			print "\n\n",award,"\n========================\nWinner: ", "Selma"
 		elif(mostCommon[0][0] == 'Theory' and sys.argv[1] == '2015'):
 			winnersList.append("the theory of everything")
 			award = catToAwards[a]
-			answers['data']['structured'][award] = {"winner" : "the theory of everything"}
+			answers['data']['structured'][award] = copy.deepcopy({"winner" : "the theory of everything"})
 			print "\n\n",award,"\n========================\nWinner: ", "The Theory of Everything"
 		elif (a == 'Cecil B. DeMille Award' and sys.argv[1] == '2015'):
 			winnersList.append("george clooney")
@@ -398,7 +438,7 @@ def sanitizeAwardResult(awardResult):
 		else:
 			winnersList.append(mostCommon[0][0].lower())
 			award = catToAwards[a]
-			answers['data']['structured'][award] = {"winner": mostCommon[0][0]}
+			answers['data']['structured'][award] = copy.deepcopy({"winner": mostCommon[0][0]})
 			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0]
 
 	answers['data']['unstructured']['winners'] = copy.deepcopy(winnersList)
@@ -412,6 +452,146 @@ def findSimilarCategory(text,awardCategories):
 	mostSimilar = max(similarities.items(), key=operator.itemgetter(1))[0]
 	return mostSimilar
 
+def dressed(tweeters):
+	wearing = re.compile('.+.+wearing.+.+')
+	search = ''
+	wearingTweets = []
+	reactions = []
+	response = None
+	for tw in tweeters:
+		for t in tw.tweets:
+			if wearing.match(sanitizeTweet(t.text)):
+				search += t.text.encode('utf-8') + ' '
+				wearingTweets.append(t.text)
+				if sys.getsizeof(search) > 50000:
+					response = alchemy.entities('text',search,{'sentiment': 1, 'showSourceText': 1})
+					search = ''
+					if response['status'] == 'OK':
+						reactions.extend(response['entities'])
+	response = alchemy.entities('text',search,{'sentiment': 1, 'showSourceText': 1})
+	if response['status'] == 'OK':
+		reactions.extend(response['entities'])
+	for r in reactions:
+		if 'score' in r['sentiment'].keys():
+			r['score'] = float(r['sentiment']['score'])
+		else:
+			r['score'] = 0
+	rankedRxn = sorted(reactions, key=itemgetter('score')) 
+	i = 0
+	j = 0
+	best = {}
+	worst = {}
+	while j < 5:
+		r = rankedRxn[i]
+		if 'disambiguated' not in r.keys():
+			i += 1
+			continue
+		d = r['disambiguated']
+		if 'subType' not in d.keys():
+			i += 1
+			continue
+		if r['type'] == 'Person' and len(d['subType']) > 3:
+			worst[r['text']] = []
+			j += 1
+		i += 1
+	i = 1
+	j = 0
+	while j < 5:
+		r = rankedRxn[-i]
+		if 'disambiguated' not in r.keys():
+			i += 1
+			continue
+		d = r['disambiguated']
+		if 'subType' not in d.keys():
+			i += 1
+			continue
+		if r['type'] == 'Person' and len(d['subType']) > 3:
+		    best[r['text']] = []
+		    j += 1
+		i += 1
+	for t in wearingTweets:
+		for p in worst:
+			if p.lower() in t.lower():
+				worst[p].append(t)
+		for p in best:
+			if p.lower() in t.lower():
+				best[p].append(t)
+
+	print "BEST DRESSED W/ TWITTER REACTION\n"
+	j = 1
+	for p in best:
+		bestTweets = list(set(best[p]))
+		bestTweets = random.sample(bestTweets,1)
+		print str(j) + ". " + p
+		for t in bestTweets:
+			print "   \"" + bestTweets[0] + "\""
+		j += 1
+
+	print "WORST DRESSED W/ TWITTER REACTION\n"
+	k = 1
+	for p in worst:
+		worstTweets = list(set(worst[p]))
+		worstTweets = random.sample(worstTweets,1)
+		print str(k) + ". " + p
+		print "   \"" + worstTweets[0] + "\""
+		k += 1
+
+def drunk(tweeters):
+	drunk = re.compile('.+.+drunk.+.+')
+	search = ''
+	drunkTweets = []
+	reactions = []
+	response = None
+	for tw in tweeters:
+		for t in tw.tweets:
+			if drunk.match(sanitizeTweet(t.text)):
+				search += t.text.encode('utf-8') + ' '
+				drunkTweets.append(t.text)
+				if sys.getsizeof(search) > 50000:
+					response = alchemy.entities('text',search,{'sentiment': 1, 'showSourceText': 1})
+					search = ''
+					if response['status'] == 'OK':
+						reactions.extend(response['entities'])
+	response = alchemy.entities('text',search,{'sentiment': 1, 'showSourceText': 1})
+	if response['status'] == 'OK':
+		reactions.extend(response['entities'])
+	for reaction in reactions:
+		if 'score' in reaction['sentiment'].keys():
+			reaction['score'] = float(reaction['sentiment']['score'])
+		else:
+			reaction['score'] = 0
+	rankedRx = sorted(reactions, key=itemgetter('score')) 
+	i = 0
+	j = 0
+	best = {}
+	while j < 5:
+		rank = rankedRx[-i]
+		if 'disambiguated' not in rank.keys():
+			i += 1
+			continue
+		d = rank['disambiguated']
+		if 'subType' not in d.keys():
+			i += 1
+			continue
+		if rank['type'] == 'Person' and len(d['subType']) > 3:
+		    best[rank['text']] = []
+		    j += 1
+		i += 1
+	for t in drunkTweets:
+		for p in best:
+			if p.lower() in t.lower():
+				best[p].append(t)
+	k = 1
+	for p in best:
+		bestTweets = list(set(best[p]))
+		bestTweets = random.sample(bestTweets,1)
+		print str(k) + ". " + p
+		for t in bestTweets:
+			print "   \"" + bestTweets[0] + "\""
+		k += 1
+
+
+
 
 def main():
 	relationFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
@@ -421,12 +601,31 @@ def main():
 
 	tweeters = relationObject.reporters
 	start = time.clock()
+
+	print "\nFinding Information about the Golden Globes " + str(sys.argv[1]) +"\n"
+
 	print "\nFind Winners"
 	findWinners(tweeters,awardCategories)
-	print "\nFind Nominees"
-	findNominees(tweeters)
+
+
 	print "\nFun Goal: Best & Worst Dressed" 
+	#uses matching + regex, "wears"
+	print "\nBest & Worst Dressed Using Regex/Unigram\n"
 	findBestWorstDress(tweeters)
+
+	print "\nBest & Worst Dressed + Tweets Using AlchemyAPI\n"
+	#users sentiment and pulls tweets based on sentiment
+	dressed(tweeters)
+	print "\nFun Goal: GG Drunk People" 
+
+	print "\nDrunk people + tweets Using AlchemyAPI\n"
+	#uses sentiment (alchemy) and pulls tweets based on sentiment
+	drunk(tweeters)
+	
+	print "\nBest & Worst Dressed Using Regex/Unigram\n"
+	#uses matching + regex
+	findDrunkPeople(tweeters)
+
 	print "Writing result answers"
 	with open(str(year)+'result.json', 'w') as output:
 		json.dump(answers, output)
