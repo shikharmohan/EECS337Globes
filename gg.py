@@ -4,6 +4,8 @@ import operator
 import re
 import collections, difflib
 import pickle
+from flask import Flask
+from flask import render_template
 from classes import *
 import time
 import sys
@@ -524,6 +526,15 @@ def drunk(tweeters):
 
 
 def main():
+	if sys.argv[1] == 'web':
+		app = Flask(__name__, static_folder='static', static_url_path='')
+
+		@app.route('/')
+		def hello(name=None):
+		    return render_template('index.html', name=name)
+
+		if __name__ == '__main__':
+		    app.run()
 	relationFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
 	categoryFile = 'Categories.txt'
 	awardCategories = getCategoriesFromFile(categoryFile)
