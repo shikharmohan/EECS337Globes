@@ -334,7 +334,8 @@ def sanitizeAwardResult(awardResult):
 			award = catToAwards[a]
 			answers['data']['structured'][award] = copy.deepcopy({"winner" : "selma"})
 			nominees = hardcodedNominees[a]['Nominees']
-			nominees.remove('Selma')
+			if 'Selma' in nominees:
+				nominees.remove('Selma')
 			print "\n\n",award,"\n========================\nWinner: ", "Selma"
 			for n in nominees:
 				print n
@@ -343,7 +344,8 @@ def sanitizeAwardResult(awardResult):
 			award = catToAwards[a]
 			answers['data']['structured'][award] = copy.deepcopy({"winner" : "the theory of everything"})
 			nominees = hardcodedNominees[a]['Nominees']
-			nominees.remove('The Theory of Everything')
+			if 'The Theory of Everything' in nominees:
+				nominees.remove('The Theory of Everything')
 			print "\n\n",award,"\n========================\nWinner: ", "The Theory of Everything"
 			for n in nominees:
 				print n
@@ -357,7 +359,8 @@ def sanitizeAwardResult(awardResult):
 			answers['data']['structured'][award] = copy.deepcopy({"winner": mostCommon[0][0]})
 			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0]
 			nominees = hardcodedNominees[a]['Nominees']
-			nominees.remove(mostCommon[0][0])
+			if mostCommon[0][0] in nominees:
+				nominees.remove(mostCommon[0][0])
 			answers['data']['structured'][award] = {"winner": mostCommon[0][0], "nominees": nominees}
 			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0], "\nNominees:"
 			for n in nominees:
