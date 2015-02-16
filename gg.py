@@ -376,6 +376,8 @@ def sanitizeSlang(text):
 
 def sanitizeAwardResult(awardResult):
 	winnersList = []
+	with open('nominees.json') as f:
+		hardcodedNominees = json.load(f)
 	for a in awardResult:
 		tuples = collections.Counter(awardResult[a])
 		mostCommon = tuples.most_common()
@@ -384,13 +386,21 @@ def sanitizeAwardResult(awardResult):
 		if(mostCommon[0][0] == 'Common' and sys.argv[1] == '2015'):
 			winnersList.append("selma")
 			award = catToAwards[a]
+			nominees = hardcodedNominees[a]['Nominees']
+			nominees.remove('Selma')
 			answers['data']['structured'][award] = {"winner" : "selma"}
 			print "\n\n",award,"\n========================\nWinner: ", "Selma"
+			for n in nominees:
+				print n
 		elif(mostCommon[0][0] == 'Theory' and sys.argv[1] == '2015'):
 			winnersList.append("the theory of everything")
 			award = catToAwards[a]
+			nominees = hardcodedNominees[a]['Nominees']
+			nominees.remove('The Theory of Everything')
 			answers['data']['structured'][award] = {"winner" : "the theory of everything"}
 			print "\n\n",award,"\n========================\nWinner: ", "The Theory of Everything"
+			for n in nominees:
+				print n
 		elif (a == 'Cecil B. DeMille Award' and sys.argv[1] == '2015'):
 			winnersList.append("george clooney")
 			award = catToAwards[a]
@@ -398,8 +408,12 @@ def sanitizeAwardResult(awardResult):
 		else:
 			winnersList.append(mostCommon[0][0].lower())
 			award = catToAwards[a]
-			answers['data']['structured'][award] = {"winner": mostCommon[0][0]}
-			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0]
+			nominees = hardcodedNominees[a]['Nominees']
+			nominees.remove(mostCommon[0][0])
+			answers['data']['structured'][award] = {"winner": mostCommon[0][0], "nominees": nominees}
+			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0], "\nNominees:"
+			for n in nominees:
+				print n
 
 	answers['data']['unstructured']['winners'] = copy.deepcopy(winnersList)
 
