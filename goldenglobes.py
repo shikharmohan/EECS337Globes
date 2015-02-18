@@ -41,7 +41,7 @@ answers = {
             },
     "awards": {
             "method": "detected",
-            "method_description": "Applied scores to tweeters and tweets, higher scores are more relevant. Used regex, proper noun extractor & keywords like nominated, wish, hope etc. to filter tweets"
+            "method_description": "Applied scores to authors and tweets, higher scores are more relevant. Used regex, proper noun extractor & keywords like nominated, wish, hope etc. to filter tweets"
             },
         "presenters": {
             "method": "hardcoded",
@@ -114,21 +114,21 @@ else:
 	
 
 
-def loadanswersFromFile(filePath):
-	answers_data = []
-	with open(filePath, 'r') as f:
-		for answersline in f:
-			answers_data.append(answers.loads(answersline))
-	return answers_data
+# def loadanswersFromFile(filePath):
+# 	answers_data = []
+# 	with open(filePath, 'r') as f:
+# 		for answersline in f:
+# 			answers_data.append(answers.loads(answersline))
+# 	return answers_data
 
-def getCategoriesFromFile(filePath):
+def getCategories(filePath):
 	awardCategories = []
 	with open(filePath, 'r') as f:
 		awardCategories = [row.rstrip('\n') for row in f]
 
 	return awardCategories
 
-def getRelationObject(filePath):
+def getRelation(filePath):
 	relationObject = pickle.load( open( filePath, "rb" ) )
 	return relationObject
 
@@ -138,62 +138,62 @@ def getProperNouns(filePath):
 		properNouns = [row.strip('\n') for row in f]
 	return properNouns
 
-def findHostTweets(text):
-	pattern = re.compile(".* host.* Golden Globes .*", re.IGNORECASE)
+# def findHostTweets(text):
+# 	pattern = re.compile(".* host.* Golden Globes .*", re.IGNORECASE)
 
 
-	hostMentioned = False
+# 	hostMentioned = False
 
-	if pattern.match(text):
-		hostMentioned = True
+# 	if pattern.match(text):
+# 		hostMentioned = True
 
-	return hostMentioned
+# 	return hostMentioned
 
-@app.route('/findHosts')
-def findHosts(twtrs):
-	possibleHosts = {}
+# @app.route('/findHosts')
+# def findHosts(athrs):
+# 	possibleHosts = {}
 
-	for twtr in twtrs:
-		for twt in twtr.tweets:
-			text = twt.text
-			if findHostTweets(text):
-					tokenizedText = nltk.wordpunct_tokenize(text)
-					properNouns = extractProperNouns(tokenizedText)
-					for possibleHost in properNouns:
-						if possibleHost not in possibleHosts.keys():
-							possibleHosts[possibleHost] = twtr.score
-						else:
-							possibleHosts[possibleHost] = possibleHosts[possibleHost] + twtr.score
+# 	for athr in athrs:
+# 		for twt in athr.tweets:
+# 			text = twt.text
+# 			if findHostTweets(text):
+# 					tokenizedText = nltk.wordpunct_tokenize(text)
+# 					properNouns = processProperNouns(tokenizedText)
+# 					for possibleHost in properNouns:
+# 						if possibleHost not in possibleHosts.keys():
+# 							possibleHosts[possibleHost] = athr.score
+# 						else:
+# 							possibleHosts[possibleHost] = possibleHosts[possibleHost] + athr.score
 
-	sorted_hosts = OrderedDict(sorted(possibleHosts.items(), key=lambda possibleHosts: possibleHosts[1], reverse=True))
-	#data = collections.Counter(possibleHosts)
-	print("\n\nList of Hosts:\n========================")
-	for host in sorted_hosts.keys():
-		if sorted_hosts[host] > 60:
-			print(host, sorted_hosts[host])
+# 	sorted_hosts = OrderedDict(sorted(possibleHosts.items(), key=lambda possibleHosts: possibleHosts[1], reverse=True))
+# 	#data = collections.Counter(possibleHosts)
+# 	print("\n\nList of Hosts:\n========================")
+# 	for host in sorted_hosts.keys():
+# 		if sorted_hosts[host] > 60:
+# 			print(host, sorted_hosts[host])
 
 
-def findWinners(tweeters, categories):
+def findWinners(authors, categories):
 	awardResult = {}
 	THRESHOLD = 200
 
 	awardPat = re.compile("best .*",re.IGNORECASE)
 	winnerPat = re.compile(".*win.*",re.IGNORECASE)
-	for twtr in tweeters:
-		tweets = twtr.tweets
+	for athr in authors:
+		tweets = athr.tweets
 		for tweet in tweets:
 			if winnerPat.match(tweet.text):
-				cleanTweet = sanitizeTweet(tweet.text)
+				cleanTweet = processTweet(tweet.text)
 				award = awardPat.search(cleanTweet)
 
 				if award:
 					properNoun =[]
-					firstHalfOfTweet = re.search("(?i).*(?=win)",cleanTweet)
-					tokenizedText = nltk.wordpunct_tokenize(firstHalfOfTweet.group())
+					halfOne = re.search("(?i).*(?=win)",cleanTweet)
+					tokenizedText = nltk.wordpunct_tokenize(halfOne.group())
 
 					if tokenizedText:
-						properNoun = extractProperNouns(tokenizedText)
-						award = sanitizeAwardName(award.group())
+						properNoun = processProperNouns(tokenizedText)
+						award = processName(award.group())
 						mostSimilarAward = findSimilarCategory(award, categories)
 						
 						if mostSimilarAward in awardResult:
@@ -204,37 +204,37 @@ def findWinners(tweeters, categories):
 		if THRESHOLD<1:
 			break
 
-	sanitizeAwardResult(awardResult)
+	processResult(awardResult)
 
-def findBestWorstDress(tweeters):
-	possibleBestDress = []
-	possibleWorstDress = []
-	bestDressPat = re.compile(".*best dress.*",re.IGNORECASE)
-	worstDressPat = re.compile(".*worst dress.*",re.IGNORECASE)
+def dressed(authors):
+	possBest = []
+	possWorst = []
+	bestPat = re.compile(".*best dress.*",re.IGNORECASE)
+	worstPat = re.compile(".*worst dress.*",re.IGNORECASE)
 	pat = ""
-	for twtr in tweeters:
-		for twt in twtr.tweets:
+	for athr in authors:
+		for twt in athr.tweets:
 			properNoun =[]
-			if bestDressPat.match(twt.text):
+			if bestPat.match(twt.text):
 				pat = "best"
-			elif worstDressPat.match(twt.text):
+			elif worstPat.match(twt.text):
 				pat = "worst"
 			else:
 				continue
-			firstHalfOfTweet = re.search("(?i).*(?=%s)" % pat,twt.text)
-			tokenizedText = nltk.wordpunct_tokenize(firstHalfOfTweet.group())
+			halfOne = re.search("(?i).*(?=%s)" % pat,twt.text)
+			tokenizedText = nltk.wordpunct_tokenize(halfOne.group())
 
 			if tokenizedText:
-				properNoun = extractProperNouns(tokenizedText)
+				properNoun = processProperNouns(tokenizedText)
 				for pn in properNoun:
 					if len(pn.split())==2 :
 						if pat == 'best':
-							possibleBestDress.append(pn)
+							possBest.append(pn)
 						else:
-							possibleWorstDress.append(pn)
+							possWorst.append(pn)
 
-	bestData = collections.Counter(possibleBestDress)
-	worstData = collections.Counter(possibleWorstDress)
+	bestData = collections.Counter(possBest)
+	worstData = collections.Counter(possWorst)
 	print("\n\nList of Best Dressed:\n========================")
 	for host in bestData.most_common()[0:5]:
 		print(host[0])
@@ -243,27 +243,27 @@ def findBestWorstDress(tweeters):
 		print(host[0])
 
 
-def findDrunkPeople(tweeters):
+def findDrunkPeople(authors):
 	possibleParties = []
 	partyPattern = re.compile(".*drunk.*",re.IGNORECASE)
 	pat = ""
 	i = 0
-	for twtr in tweeters:
+	for athr in authors:
 		i += 1
 		if i > 1000000:
 			break
-		for twt in twtr.tweets:
+		for twt in athr.tweets:
 			i += 1
 			properNoun =[]
 			if partyPattern.match(twt.text):
 				pat = "drunk"
 			else:
 				continue
-			firstHalfOfTweet = re.search("(?i).*(?=%s)" % pat,twt.text)
-			tokenizedText = nltk.wordpunct_tokenize(firstHalfOfTweet.group())
+			halfOne = re.search("(?i).*(?=%s)" % pat,twt.text)
+			tokenizedText = nltk.wordpunct_tokenize(halfOne.group())
 
 			if tokenizedText:
-				properNoun = extractProperNouns(tokenizedText)
+				properNoun = processProperNouns(tokenizedText)
 				for pn in properNoun:
 					if len(pn.split())==2 :
 						if pat == 'drunk':
@@ -274,9 +274,7 @@ def findDrunkPeople(tweeters):
 	for host in data.most_common()[0:15]:
 		print(host[0])
 
-
-
-def extractProperNouns(tokenizedText):
+def processProperNouns(tokenizedText):
 	taggedText = tagger.tag(tokenizedText)
 	grammar = "NP: {<NNP>*}"
 	cp = nltk.RegexpParser(grammar)
@@ -297,39 +295,33 @@ def extractProperNouns(tokenizedText):
 					properNouns.append(phrase)
 	return properNouns
 
-def sanitizeTweet(text):
-	# remove rewteet
+def processTweet(text):
 	cleanTweet = re.sub("RT ", "", text)
-
-	# remove links
 	if re.match(".*http.*(?= )", cleanTweet):
 		cleanTweet = re.sub("http.* ","",cleanTweet)
 	else:
 		cleanTweet = re.sub("http.*","",cleanTweet)
-
-	# remove @ and #
 	symbolsStopList = ["@", "#", "\"", "!", "=", "\.", "\(", "\)", "Golden Globes"]
 	for symbol in symbolsStopList:
 		cleanTweet = re.sub("%s" % symbol, "", cleanTweet)
 
 	return cleanTweet
 
-def sanitizeAwardName(text):
+def processName(text):
 	cleanAward = text
 	for stopWord in awardNameStopList:
 		cleanAward = re.sub("%s " % stopWord, "", cleanAward)
-
 	return cleanAward
 
-def sanitizeSlang(text):
-	cleanTweet = text
-	stopList = slangStopList
-	for stopWord in stopList:
-		cleanTweet = re.sub("(?i)%s " % stopWord, "", cleanTweet)
+# def sanitizeSlang(text):
+# 	cleanTweet = text
+# 	stopList = slangStopList
+# 	for stopWord in stopList:
+# 		cleanTweet = re.sub("(?i)%s " % stopWord, "", cleanTweet)
 
-	return cleanTweet
+# 	return cleanTweet
 
-def sanitizeAwardResult(awardResult):
+def processResult(awardResult):
 	winnersList = []
 	with open('nominees.json') as f:
 		hardcodedNominees = json.load(f)
@@ -365,12 +357,10 @@ def sanitizeAwardResult(awardResult):
 		else:
 			winnersList.append(mostCommon[0][0].lower())
 			award = catToAwards[a]
-			answers['data']['structured'][award] = copy.deepcopy({"winner": mostCommon[0][0]})
-			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0]
 			nominees = hardcodedNominees[a]['Nominees']
 			if mostCommon[0][0] in nominees:
 				nominees.remove(mostCommon[0][0])
-			answers['data']['structured'][award] = {"winner": mostCommon[0][0], "nominees": nominees}
+			answers['data']['structured'][award] = copy.deepcopy({"winner": mostCommon[0][0], "nominees": nominees})
 			print "\n\n",award,"\n========================\nWinner: ", mostCommon[0][0], "\nNominees:"
 			for n in nominees:
 				print n
@@ -393,15 +383,15 @@ def findSimilarCategory(text,awardCategories):
 	mostSimilar = max(similarities.items(), key=operator.itemgetter(1))[0]
 	return mostSimilar
 
-def dressed(tweeters):
+def dressed(authors):
 	wearing = re.compile('.+.+wearing.+.+')
 	search = ''
 	wearingTweets = []
 	reactions = []
 	response = None
-	for tw in tweeters:
+	for tw in authors:
 		for t in tw.tweets:
-			if wearing.match(sanitizeTweet(t.text)):
+			if wearing.match(processTweet(t.text)):
 				search += t.text.encode('utf-8') + ' '
 				wearingTweets.append(t.text)
 				if sys.getsizeof(search) > 50000:
@@ -480,15 +470,15 @@ def dressed(tweeters):
 		print "   \"" + worstTweets[0] + "\""
 		k += 1
 
-def drunk(tweeters):
+def drunk(authors):
 	drunk = re.compile('.+.+drunk.+.+')
 	search = ''
 	drunkTweets = []
 	reactions = []
 	response = None
-	for tw in tweeters:
+	for tw in authors:
 		for t in tw.tweets:
-			if drunk.match(sanitizeTweet(t.text)):
+			if drunk.match(processTweet(t.text)):
 				search += t.text.encode('utf-8') + ' '
 				drunkTweets.append(t.text)
 				if sys.getsizeof(search) > 50000:
@@ -542,35 +532,35 @@ def main():
 	print "\nLoading data in from preprocessed files...\n"
 	relationFile = 'userTweetRelation'+str(sys.argv[1])+'.txt'
 	categoryFile = 'Categories.txt'
-	awardCategories = getCategoriesFromFile(categoryFile)
-	relationObject = getRelationObject(relationFile)
+	awardCategories = getCategories(categoryFile)
+	relationObject = getRelation(relationFile)
 
-	tweeters = relationObject.reporters
+	authors = relationObject.reporters
 	start = time.clock()
 
 	print "\nFinding Information about the Golden Globes " + str(sys.argv[1]) +"\n"
 
 	print "\nFind Winners"
-	findWinners(tweeters,awardCategories)
+	findWinners(authors,awardCategories)
 
 
 	print "\nFun Goal: Best & Worst Dressed" 
 	#uses matching + regex, "wears"
 	print "\nBest & Worst Dressed Using Regex\n"
-	findBestWorstDress(tweeters)
+	dressed(authors)
 
 	print "\nBest & Worst Dressed + Tweets Using AlchemyAPI\n"
 	#users sentiment and pulls tweets based on sentiment
-	dressed(tweeters)
+	dressed(authors)
 	print "\nFun Goal: GG Drunk People" 
 
 	print "\nDrunk people + tweets Using AlchemyAPI\n"
 	#uses sentiment (alchemy) and pulls tweets based on sentiment
-	drunk(tweeters)
+	drunk(authors)
 	
 	print "\nBest & Worst Dressed Using Regex\n"
 	#uses matching + regex
-	findDrunkPeople(tweeters)
+	findDrunkPeople(authors)
 
 	print "Writing result answers"
 	with open(str(year)+'result.json', 'w') as output:
